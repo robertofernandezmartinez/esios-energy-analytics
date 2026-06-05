@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: raw_esios
+    database: esios-energy-analytics
+    schema: raw_esios
+    description: "Raw data loaded by DLT from the ESIOS REE API"
+    tables:
+      - name: esios_readings
+        description: "Raw electricity system readings - generation, demand and price indicators"
+        columns:
+          - name: indicator_id
+            description: "Numeric ID of the ESIOS indicator"
+          - name: indicator_name
+            description: "Descriptive name of the indicator"
+          - name: value
+            description: "Raw numeric value in MW or EUR/MWh depending on indicator"
+          - name: datetime_utc
+            description: "Timestamp of the reading in UTC"
+          - name: datetime_local
+            description: "Timestamp of the reading in local Spanish time (CET/CEST)"
+          - name: geo_id
+            description: "Geographic zone ID (8741 = Peninsula)"
+          - name: geo_name
+            description: "Geographic zone name"

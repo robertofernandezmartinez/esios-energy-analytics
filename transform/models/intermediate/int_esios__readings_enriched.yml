@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: int_esios__readings_enriched
+    description: "Enriched readings with technology category, renewable flag and human readable names."
+    columns:
+      - name: _dlt_id
+        description: "Unique row identifier inherited from staging"
+        tests:
+          - unique
+          - not_null
+
+      - name: data_type
+        description: "Category of the indicator: generation, demand or price"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['generation', 'demand', 'price']
+
+      - name: is_renewable
+        description: "True if the technology is renewable. Null for demand and price indicators."
+        tests:
+          - not_null:
+              where: "data_type = 'generation'"
+
+      - name: technology_name
+        description: "Human readable technology name in English"
+        tests:
+          - not_null
