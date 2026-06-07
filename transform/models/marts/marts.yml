@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: mart_generation_mix
+    description: "Hourly generation mix by technology with renewable percentage. One row per technology per hour."
+    columns:
+      - name: ts_utc
+        description: "Timestamp of the reading in UTC"
+        tests:
+          - not_null
+
+      - name: technology_name
+        description: "Human readable technology name"
+        tests:
+          - not_null
+
+      - name: value_mw
+        description: "Generation in MW for this technology and hour"
+        tests:
+          - not_null
+
+      - name: pct_of_total
+        description: "Percentage of total generation for this technology in this hour"
+        tests:
+          - not_null
+
+      - name: pct_renewable
+        description: "Percentage of renewable generation in total for this hour"
+        tests:
+          - not_null
+
+  - name: mart_demand_and_price
+    description: "Hourly demand and spot market price with anomaly flags."
+    columns:
+      - name: ts_utc
+        description: "Timestamp of the reading in UTC. Note: DST changeover dates (last Sunday of October) may contain duplicate timestamps due to clock rollback."
+        tests:
+          - not_null
+
+      - name: demand_mw
+        tests:
+          - not_null
+
+      - name: is_demand_collapse
+        tests:
+          - not_null
+
+  - name: mart_daily_renewable_summary
+    description: "Daily aggregated renewable vs non-renewable generation summary."
+    columns:
+      - name: date_utc
+        tests:
+          - not_null
+          - unique
+
+      - name: pct_renewable
+        tests:
+          - not_null
+
+      - name: total_generation_gwh
+        tests:
+          - not_null

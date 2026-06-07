@@ -13,8 +13,8 @@ with demand as (
 price as (
     select
         ts_utc,
-        -- ESIOS returns price in mEUR/MWh (milieuro), divide by 1000 to get EUR/MWh
-        round(value_mw / 1000, 2) as price_eur_mwh
+        -- (macro) ESIOS returns price in mEUR/MWh (milieuro), divide by 1000 to get EUR/MWh
+        {{ convert_meur_to_eur('value_mw') }} as price_eur_mwh
     from {{ ref('int_esios__readings_enriched') }}
     where indicator_name = 'precio_mercado_spot'
 ),

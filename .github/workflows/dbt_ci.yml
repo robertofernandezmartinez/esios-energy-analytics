@@ -1,0 +1,54 @@
+name: dbt CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dbt-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install dbt-bigquery
+
+      - name: Set up dbt profiles
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << EOF
+          esios_energy_analytics:
+            target: ci
+            outputs:
+              ci:
+                type: bigquery
+                method: service-account-json
+                project: esios-energy-analytics
+                dataset: dbt_ci
+                threads: 4
+                timeout_seconds: 300
+                location: EU
+                keyfile_json: ${{ "{{" }} secrets.GCP_SERVICE_ACCOUNT_JSON }}
+          EOF
+
+      - name: dbt deps
+        working-directory: transform
+        run: dbt deps
+
+      - name: dbt compile
+        working-directory: transform
+        run: dbt compile
+
+      - name: dbt test
+        working-directory: transform
+        run: dbt test
