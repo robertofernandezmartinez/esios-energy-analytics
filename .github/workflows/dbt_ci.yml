@@ -49,6 +49,10 @@ jobs:
         working-directory: transform
         run: dbt compile
 
+      - name: dbt run
+        working-directory: transform
+        run: dbt run
+
       - name: dbt test
         working-directory: transform
         run: dbt test
