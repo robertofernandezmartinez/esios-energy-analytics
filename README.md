@@ -200,6 +200,32 @@ The ESIOS token is issued for personal use by REE. To reproduce this project you
 
 ---
 
+## Snowflake Port
+
+The pipeline was partially ported to Snowflake to document cross-warehouse differences.
+
+**What was completed:**
+- Snowflake trial account configured (GCP, Frankfurt region)
+- DLT pipeline successfully loading data to Snowflake (`ESIOS_ANALYTICS` database)
+- dbt connection configured and verified via `dbt debug --target snowflake`
+- SQL type incompatibilities identified and resolved (e.g. `FLOAT64` → `FLOAT`, `SAFE_DIVIDE` → `DIV0`)
+
+**Key differences observed vs BigQuery:**
+
+| Aspect | BigQuery | Snowflake |
+|---|---|---|
+| Compute model | Serverless, pay per TB scanned | Virtual warehouses, pay per compute time |
+| Database identifier | Project ID with hyphens (`esios-energy-analytics`) | Clean name (`ESIOS_ANALYTICS`) |
+| Float type | `FLOAT64` | `FLOAT` |
+| Safe division | `SAFE_DIVIDE(a, b)` | `DIV0(a, b)` |
+| Auth method | OAuth / Service Account | Username + password / key pair |
+| Default region | Must specify (`EU`) | Selected at account creation |
+| dbt profile method | `oauth` or `service-account-json` | `user` + `password` |
+
+**Conclusion:** Both warehouses support the full dbt transformation layer. The main adaptation required is SQL type compatibility, which in a production setup would be abstracted via dbt macros (e.g. `{{ float_type() }}`).
+
+---
+
 ## Author
 
 [Roberto Fernández Martínez](https://www.linkedin.com/in/robertofernandezmartinez/) · Analytics Engineer

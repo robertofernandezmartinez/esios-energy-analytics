@@ -82,27 +82,40 @@ def generate_monthly_ranges(start: date, end: date):
         yield current.strftime("%Y-%m-%d"), month_end.strftime("%Y-%m-%d")
         current += relativedelta(months=1)
 
-
 if __name__ == "__main__":
-    # Define the pipeline: name, destination and target dataset in BigQuery
-    pipeline = dlt.pipeline(
+    # Set to True to run Snowflake pipeline
+    RUN_SNOWFLAKE = False
+
+    # BIGQUERY PIPELINE
+    pipeline_bq = dlt.pipeline(
         pipeline_name="esios_pipeline",
         destination="bigquery",
         dataset_name="raw_esios"
     )
 
-    # Backfill: load full years 2024 and 2025 month by month
     backfill_start = date(2024, 1, 1)
     backfill_end   = date(2025, 12, 31)
 
     for month_start, month_end in generate_monthly_ranges(backfill_start, backfill_end):
-        print(f"Loading {month_start} → {month_end}")
-        load_info = pipeline.run(
-            esios_source(
-                start_date=month_start,
-                end_date=month_end
-            )
+        print(f"[BigQuery] Loading {month_start} → {month_end}")
+        load_info = pipeline_bq.run(
+            esios_source(start_date=month_start, end_date=month_end)
         )
         print(load_info)
-        # Pause between months to avoid hammering the API
         time.sleep(2)
+
+    # SNOWFLAKE PIPELINE - set RUN_SNOWFLAKE=True to execute
+    if RUN_SNOWFLAKE:
+        pipeline_sf = dlt.pipeline(
+            pipeline_name="esios_pipeline_snowflake",
+            destination="snowflake",
+            dataset_name="raw_esios"
+        )
+
+        for month_start, month_end in generate_monthly_ranges(date(2025, 1, 1), date(2025, 12, 31)):
+            print(f"[Snowflake] Loading {month_start} → {month_end}")
+            load_info = pipeline_sf.run(
+                esios_source(start_date=month_start, end_date=month_end)
+            )
+            print(load_info)
+            time.sleep(2)
